@@ -1,1 +1,23 @@
 
+#load the baseline panel
+listtomatch<-read.dta("recalbase.dta")
+
+#clean and match MC
+library(foreign)
+metareviews<-read.dta(
+"F:\\All_Projects\\Project_Ming\\VariableList\\MetacriticMovieDay\\IndividualRecord.dta")
+
+#select the movies in MC
+metacritic<-metareviews[
+which(metareviews$title%in%listtomatch$movietitle),]
+#attach the review date to MC
+attachrelease<-unique(cbind(
+listtomatch$movietitle,listtomatch$DateR))
+
+#calculate time past from the movie released day
+
+
+
+#clean and match RT
+
+#
