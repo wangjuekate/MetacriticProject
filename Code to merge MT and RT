@@ -1,23 +1,56 @@
-
+library(foreign)
+library(plyr)
 #load the baseline panel
 listtomatch<-read.dta("recalbase.dta")
+head(listtomatch)
+
+
+
+attachrelease<-cbind(
+as.character(as.matrix(listtomatch$movietitle)),listtomatch$DateR)
+#checkpoints
+head(attachrelease)
+#clean up duplications
+attachrelease<-unique(attachrelease)
+attachrelease<-data.frame(attachrelease)
+head(attachrelease)
+attachrelease[which(attachrelease$X1=="A Cinderella Story"),]
+
+write.table(attachrelease[which(attachrelease$X2=="NA"),],file="tofill.csv",sep=",",row.names=FALSE)
+
 
 #clean and match MC
 library(foreign)
 metareviews<-read.dta(
-"F:\\All_Projects\\Project_Ming\\VariableList\\MetacriticMovieDay\\IndividualRecord.dta")
+"IndividualRecord.dta")
 
 #select the movies in MC
 metacritic<-metareviews[
 which(metareviews$title%in%listtomatch$movietitle),]
+
 #attach the review date to MC
-attachrelease<-unique(cbind(
-listtomatch$movietitle,listtomatch$DateR))
+nrow(metacritic)
+metacritic1<-merge(metacritic,attachrelease,
+by.x="title",by.y="X1",
+all.x=TRUE)
+nrow(metacritic1)
+metacritic<-metacritic1
+head(metacritic)
+
+#as we do not have critics time
+#separate critics and users data and store separately
+MCcritic<-metacritic[which(metacritic$critic==1),]
+MCuser<-metacritic[which(metacritic$critic==0),]
+write.dta(MCcritic,file="MCcritic.dta")
+write.table(MCuser,file="MCuser.csv",sep=",",na="",row.names=FALSE)
+
 
 #calculate time past from the movie released day
+timepast<-as.Date(as.character(as.matrix(MCuser$X2)))-
+as.Date(paste(MCuser$year,MCuser$month,
+MCuser$day,sep="-"))
+timepast<-as.numeric(as.matrix(timepast))
+summary(timepast)
 
-
-
-#clean and match RT
-
-#
+#Checking missing value
+MCuser[which(is.na(timepast))[1:10],]
