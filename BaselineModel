@@ -1,1 +1,39 @@
 #Find the intersect Between MC and RT between 2000 and 2013
+
+#Get RT list
+mm<-tomatoreviews[order(tomatoreviews$movie_title),]
+library(foreign)
+rotten<-read.dta(
+"ReviewsRotten.dta")
+rottenmovie<-unique(rotten$movie_title)
+write.table(rottenmovie,file="RTlist.csv",sep=",",row.names=FALSE)
+length(rottenmovie)
+[1] 7603
+
+#Get MC list
+meta<-read.dta(
+"IndividualRecord.dta")
+meta<-meta[which(meta$product==1),]
+MTcritic<-meta[which(meta$critic==1),]
+MTuser<-meta[which(meta$critic==0),]
+write.dta(MTcritic,file="MTcritic.dta")
+write.table(MTuser,file="MTuser.csv",
+sep=",",row.names=FALSE,na="")
+metalist<-unique(MTuser$title)
+write.table(metalist,file="MTlist.csv",
+sep=",",row.names=FALSE,na="")
+> length(metalist)
+[1] 5075
+
+OverlapList<-intersect(rottenmovie,metalist)
+> length(OverlapList)
+[1] 4342
+write.table(OverlapList,file="Overlaplist.csv",
+sep=",",row.names=FALSE,na="")
+
+Unionlist<-c(rottenmovie,metalist)
+Unionlist<-unique(Unionlist)
+length(Unionlist)
+[1] 8336
+write.table(Unionlist,file="Unionlist.csv",
+sep=",",row.names=FALSE,na="")
