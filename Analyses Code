@@ -1,5 +1,98 @@
 results<-lm(diffpercentage~Kurtodiff+priordiffreviewer+logmonthage+
-RTmean_p+MCmean_p
-,data=fulldata)
+priormeanscore
+,data=fulldata[which(fulldata$monthage<75),])
 #cluster around movies
-summary(results, cluster=c("titleID"))
+mm<-summary(results, cluster=c("titleID"))
+
+
+hist(fulldata$monthage, main="Histogram for Movie Review Lifespan", 
+     xlab="Months Since the First Review",
+     ylab="Freq.",
+     border="black", 
+     col="white",
+     xlim=c(0,160),
+     las=1, 
+     breaks=25)
+
+#Figure absolute number
+library(ggplot2)
+library(plyr)
+todrawdata<-fulldata[,1:2]
+todrawdata$RTuser<-fulldata$RTuser
+todrawdata$MCuser<-fulldata$MCuser
+addup<-function(input){
+RTuser<-mean(input[,3])
+MCuser<-mean(input[,4])
+output<-data.frame(RTuser)
+output<-cbind(output,MCuser)
+return(output)
+}
+
+todraw<-ddply(todrawdata,.(monthage),addup)
+
+#Figure percentage
+
+library(ggplot2)
+library(plyr)
+todrawdata<-fulldata[,1:2]
+todrawdata$RTuser<-fulldata$RTpercent
+todrawdata$MCuser<-fulldata$MCpercent
+addup<-function(input){
+RTuser<-mean(input[,3])
+MCuser<-mean(input[,4])
+output<-data.frame(RTuser)
+output<-cbind(output,MCuser)
+return(output)
+}
+
+todraw<-ddply(todrawdata,.(monthage),addup)
+
+#Figure adjust across movie population
+#addup to reviews permonth
+adduptoeachmonthdata<-fulldata[,52:53]
+adduptoeachmonthdata$MCuser<-fulldata$MCuser
+adduptoeachmonthdata$RTuser<-fulldata$RTuser
+
+adduptoeachmonth<-function(input){
+MCreviewpop<-sum(input[,3])
+RTreviewpop<-sum(input[,4])
+output<-data.frame(MCreviewpop)
+output<-cbind(output,RTreviewpop)
+}
+toadd<-ddply(adduptoeachmonthdata,.(currentyear,currentmonth),adduptoeachmonth)
+nrow(fulldata)
+fulldata<-merge(fulldata,toadd,
+by.x=c("currentyear","currentmonth"),
+by.y=c("currentyear","currentmonth"),all.x=TRUE)
+fulldata$MCadjpop<-fulldata$MCuser*100/(fulldata$MCreviewpop+1)
+fulldata$RTadjpop<-fulldata$RTuser*100/(fulldata$RTreviewpop+1)
+library(ggplot2)
+library(plyr)
+todrawdata<-fulldata[,3:4]
+todrawdata$RTuser<-fulldata$RTadjpop
+todrawdata$MCuser<-fulldata$MCadjpop
+addup<-function(input){
+RTuser<-mean(input[,3])
+MCuser<-mean(input[,4])
+output<-data.frame(RTuser)
+output<-cbind(output,MCuser)
+return(output)
+}
+
+todraw<-ddply(todrawdata,.(monthage),addup)
+todraw<-todraw[1:160,]
+
+#Same picture drawing part
+
+cols <- c("RT"="longdash","MC"="solid")
+p<-ggplot(todraw,aes(monthage))
+p<-p+scale_linetype_manual(name="Websites",values=cols) 
+p<-p+
+geom_line(aes(y=MCuser,linetype="MC"))+
+geom_line(aes(y=RTuser,linetype="RT"))
+p<-p+labs(x="Months Since the First Review",y="Mean Number of Reviews"
+)
+p<-p+ theme(legend.key = element_rect(fill = "white",colour = "white"))
+p<-p+ theme_bw() +
+  theme(axis.title.x = element_text(size = 15, vjust=-.2)) +
+  theme(axis.title.y = element_text(size = 15, vjust=0.3))
