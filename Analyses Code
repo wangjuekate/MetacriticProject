@@ -1,4 +1,5 @@
-results<-lm(y~z,data=data)
+results<-lm(diffpercentage~Kurtodiff+priordiffreviewer+logmonthage+
+RTmean_p+MCmean_p
+,data=fulldata)
 #cluster around movies
-summary(lm.object, cluster=c("variable"))
-
+summary(results, cluster=c("titleID"))
