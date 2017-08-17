@@ -1,0 +1,4 @@
+results<-lm(y~z,data=data)
+#cluster around movies
+summary(lm.object, cluster=c("variable"))
+
