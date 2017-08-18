@@ -1,6 +1,16 @@
-results<-lm(diffpercentage~Kurtodiff+priordiffreviewer+logmonthage+
-priormeanscore
-,data=fulldata[which(fulldata$monthage<75),])
+#test all the reviews
+results<-lm(diffpercentage~diffconten 
++priordiffreviewer+logmonthage+
++ priormeanscore+vardiff
+ ,data=fulldata[which(fulldata$currentyear<2010),])
+ 
+ #test additional Dif-in-Dif
+ results<-lm(diffpercentage~diffconten 
++priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten*MCtreatment
+ ,data=fulldata[which(fulldata$Ryear_x<2010&fulldata$Ryear_x>2008),])
+
+ 
 #cluster around movies
 mm<-summary(results, cluster=c("titleID"))
 
@@ -47,7 +57,7 @@ return(output)
 
 todraw<-ddply(todrawdata,.(monthage),addup)
 
-#Figure adjust across movie population
+#Figure adjust across movie population (failed) (do not try again)
 #addup to reviews permonth
 adduptoeachmonthdata<-fulldata[,52:53]
 adduptoeachmonthdata$MCuser<-fulldata$MCuser
