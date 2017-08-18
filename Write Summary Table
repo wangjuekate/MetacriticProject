@@ -1,0 +1,21 @@
+final<-datafinal[,1:2]
+final$numreviw<-datafinal$numreviw
+final$meancritic<-datafinal$meancritic
+final$Usercomplexity <-datafinal$Usercomplexity
+final$CC<-datafinal$CC
+final$popuser<-datafinal$popuser
+final$neg<-datafinal$neg
+final$diff<-datafinal$diff
+final$viewer<-datafinal$viewer
+
+
+matrixfinal<-cor(final)
+
+matrixfinal[upper.tri(matrixfinal,diag=TRUE)]<-""
+
+print.xtable(xtable(matrixfinal),type="html",file="Correlation.html")
+
+print.xtable(xtable(data.frame(describe(
+final))),type="html",file="Countysummary.html")
+
+datafinal[which(is.na(datafinal$diff)),]$diff<-0
