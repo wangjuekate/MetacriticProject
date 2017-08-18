@@ -1,14 +1,52 @@
 #test all the reviews
-results<-lm(diffpercentage~diffconten 
-+priordiffreviewer+logmonthage+
+results<-lm(diffpercentage~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff
+ ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<50),])
+ 
+ results<-lm(diffpercentage~priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten
+ ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<50),])
+ 
+  results<-lm(Lower25diff~priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten
+ ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<50),])
+ 
+  results<-lm(Higher75diff~priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten
+ ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<50),])
+ 
+#Change time span
+ results<-lm(diffpercentage~priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten
+ ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<12),])
+ 
+ results<-lm(diffpercentage~priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten
+ ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<96),])
+ 
+  results<-lm(diffpercentage~priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten
  ,data=fulldata[which(fulldata$currentyear<2010),])
  
+ 
  #test additional Dif-in-Dif
+ 
+  results<-lm(diffpercentage~priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten
+ ,data=fulldata[which(fulldata$Ryear_x<2010&fulldata$Ryear_x>2008 & fulldata$currentyear<2012),])
+mm<-summary(results, cluster=c("titleID"))
+
+
  results<-lm(diffpercentage~diffconten 
 +priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten*MCtreatment
- ,data=fulldata[which(fulldata$Ryear_x<2010&fulldata$Ryear_x>2008),])
+ ,data=fulldata[which(fulldata$Ryear_x<2010&fulldata$Ryear_x>2008 & fulldata$currentyear<2012),])
+mm<-summary(results, cluster=c("titleID"))
+
+#draw interaction
+
+
+
 
  
 #cluster around movies
