@@ -1,7 +1,8 @@
 #test all the reviews
-results<-lm(diffpercentage~priordiffreviewer+logmonthage+
+library(nlme)
+results<-glm(diffpercentage~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff
- ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<50),])
+ ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<50),],correlation=corAR1(form=~movieID))
  
  results<-lm(diffpercentage~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten
