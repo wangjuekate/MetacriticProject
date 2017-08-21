@@ -29,36 +29,46 @@ correlation=corAR1(form=~1|titleID))
 
 
 #Change time span
- results<-lm(diffpercentage~priordiffreviewer+logmonthage+
+ results<-gls(diffpercentage~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten
- ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<12),])
+ ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<12),],correlation=corAR1(form=~1|titleID))
  
- results<-lm(diffpercentage~priordiffreviewer+logmonthage+
+ results<-gls(diffpercentage~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten
- ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<96),])
+ ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<96),],correlation=corAR1(form=~1|titleID))
  
-  results<-lm(diffpercentage~priordiffreviewer+logmonthage+
+  results<-gls(diffpercentage~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten
- ,data=fulldata[which(fulldata$currentyear<2010),])
+ ,data=fulldata[which(fulldata$currentyear<2010),],correlation=corAR1(form=~1|titleID))
  
  
  #test additional Dif-in-Dif
  
-  results<-lm(diffpercentage~priordiffreviewer+logmonthage+
+  results<-gls(diffpercentage~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten
- ,data=fulldata[which(fulldata$Ryear_x<2010&fulldata$Ryear_x>2008 & fulldata$currentyear<2012),])
-mm<-summary(results, cluster=c("titleID"))
+ ,data=fulldata[which(fulldata$Ryear_x<2010&fulldata$Ryear_x>2008 & fulldata$currentyear<2012),],
+correlation=corAR1(form=~1|titleID))
+
+  results<-gls(diffpercentage~priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten+diffconten*MCtreatment
+ ,data=fulldata[which(fulldata$Ryear_x<2010&fulldata$Ryear_x>2008 & fulldata$currentyear<2012),],
+correlation=corAR1(form=~1|titleID))
 
 
- results<-lm(diffpercentage~diffconten 
-+priordiffreviewer+logmonthage+
-+ priormeanscore+vardiff+diffconten*MCtreatment
- ,data=fulldata[which(fulldata$Ryear_x<2010&fulldata$Ryear_x>2008 & fulldata$currentyear<2012),])
-mm<-summary(results, cluster=c("titleID"))
+#absolute number regression
+fulldata$absreview<-fulldata$MCuser-fulldata$RTuser
 
-#draw interaction
-
-
+results<-gls(absreview~priordiffreviewer+logmonthage+
+ priormeanscore+vardiff
+ ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<50),],
+correlation=corAR1(form=~1|titleID))
+ 
+ 
+ results<-gls(absreview~priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten
+ ,
+data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<50),],
+correlation=corAR1(form=~1|titleID))
 
 
  
