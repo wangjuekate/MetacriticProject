@@ -1,11 +1,14 @@
 #construct subdata set for summary
 data<-fulldata[,1:2]
 data$diffpercentage<-fulldata$diffpercentage
+data$Lower25diff<-fulldata$Lower25diff
+data$Higher75diff<-fulldata$Higher75diff
 data$diffconten<-fulldata$diffconten
 data$priordiffreviewer<-fulldata$priordiffreviewer
 data$logmonthage<-fulldata$logmonthage
 data$priormeanscore<-fulldata$priormeanscore
 data$vardiff<-fulldata$vardiff
+
 
 
 matrixfinal<-cor(data)
