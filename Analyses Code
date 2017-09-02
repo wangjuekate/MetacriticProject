@@ -73,17 +73,32 @@ correlation=corAR1(form=~1|titleID))
 
  
 #cluster around movies
-mm<-summary(results, cluster=c("titleID"))
+library(foreign)
+fulldata<-read.dta(
+"D:\\All_Projects\\Project_Ming\\Final Data Set\\MovieProject_0817.dta")
+
+fulldata$currentmonth<-fulldata$Rmonth_x+fulldata$monthage
+fulldata$currentyear<-fulldata$Ryear_x+floor(fulldata$currentmonth/12)
+fulldata[which(fulldata$currentmonth==12),]$currentyear<-
+fulldata[which(fulldata$currentmonth==12),]$Ryear_xful
+fulldata$currentmonth<-fulldata$currentmonth%%12
+fulldata[which(fulldata$currentmonth==0),]$currentmonth<-12
 
 
-hist(fulldata$monthage, main="Histogram for Movie Review Lifespan", 
-     xlab="Months Since the First Review",
-     ylab="Freq.",
-     border="black", 
-     col="white",
-     xlim=c(0,160),
-     las=1, 
-     breaks=25)
+#The observation period for movies before Janunary 2010
+calcu<-fulldata[,1:4]
+calcu<-calcu[which(calcu$currentyear<2010),]
+calmovieage<-function(input){
+return(max(input[,4]))
+}
+library(plyr)
+results<-ddply(calcu,.(titleID),calmovieage)
+library(ggplot2)
+p<-ggplot(results)
+p<-p+geom_histogram(binwidth=5,colour="black",fill="white",aes(x=V1))
+p<-p+labs(x="The Length of Observation Windows of Movies")
+p<-p+theme_bw()
+
 
 #Figure absolute number
 library(ggplot2)
