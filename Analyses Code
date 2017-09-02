@@ -177,8 +177,8 @@ fulldata$RTreview_p1<-
 as.numeric(as.matrix(unlist(strsplit(as.matrix(results[,3]),","))))
 fulldata[which(fulldata$RTreview_p1==0),]$RTreview_p1<-fulldata[which(fulldata$RTreview_p1==0),]$RTreviewpop
 
-fulldata$MCadjpop<-fulldata$MCuser/(fulldata$MCreview_p1+1)
-fulldata$RTadjpop<-fulldata$RTuser/(fulldata$RTreview_p1+1)
+fulldata$MCadjpop<-fulldata$MCuser*10000/(fulldata$MCreview_p1+1)
+fulldata$RTadjpop<-fulldata$RTuser*10000/(fulldata$RTreview_p1+1)
 
 fulldata$diffadjpop<-fulldata$MCadjpop-fulldata$RTadjpop
 
