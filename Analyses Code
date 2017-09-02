@@ -14,6 +14,26 @@ correlation=corAR1(form=~1|titleID))
 data=fulldata[which(fulldata$currentyear<2010 ),],
 correlation=corAR1(form=~1|titleID))
 
+#whether extreme opinions will be posted
+
+ results<-gls(Higher75diff~priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten
+ ,
+data=fulldata[which(fulldata$currentyear<2010),],
+correlation=corAR1(form=~1|titleID))
+
+summary(results)
+
+
+ results<-gls(Lower25diff~priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten
+ ,
+data=fulldata[which(fulldata$currentyear<2010),],
+correlation=corAR1(form=~1|titleID))
+
+summary(results)
+
+
 
 #Change time span
 
