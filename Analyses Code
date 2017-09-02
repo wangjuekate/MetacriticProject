@@ -2,55 +2,57 @@
 library(foreign)
 fulldata<-read.dta("MovieProject_0817.dta")
 library(nlme)
-
-results<-gls(diffadjpop~priordiffreviewer+logmonthage+
- priormeanscore+vardiff
- ,
-data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<48),],
-correlation=corAR1(form=~1|titleID))
- 
- 
  results<-gls(diffadjpop~priordiffreviewer+logmonthage+
-+ priormeanscore+vardiff+diffconten
++ priormeanscore+vardiff
  ,
-data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<48),],
+data=fulldata[which(fulldata$currentyear<2010 ),],
 correlation=corAR1(form=~1|titleID))
 
- results<-gls(Lower25diff~priordiffreviewer+logmonthage+
+  results<-gls(diffadjpop~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten
  ,
-data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<50),],
-correlation=corAR1(form=~1|titleID))
-
- results<-gls(Higher75diff~priordiffreviewer+logmonthage+
-+ priormeanscore+vardiff+diffconten
- ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<50),],
+data=fulldata[which(fulldata$currentyear<2010 ),],
 correlation=corAR1(form=~1|titleID))
 
 
 #Change time span
- results<-gls(diffpercentage~priordiffreviewer+logmonthage+
+
+  results<-gls(diffadjpop~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten
- ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<12),],correlation=corAR1(form=~1|titleID))
- 
- results<-gls(diffpercentage~priordiffreviewer+logmonthage+
+ ,
+data=fulldata[which(fulldata$currentyear<2010 
+&fulldata$Ryear_x>2001),],
+correlation=corAR1(form=~1|titleID))
+
+
+  results<-gls(diffadjpop~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten
- ,data=fulldata[which(fulldata$currentyear<2010 & fulldata$monthage<96),],correlation=corAR1(form=~1|titleID))
- 
-  results<-gls(diffpercentage~priordiffreviewer+logmonthage+
+ ,
+data=fulldata[which(fulldata$currentyear<2010 
+&fulldata$Ryear_x>2008),],
+correlation=corAR1(form=~1|titleID))
+
+
+  results<-gls(diffadjpop~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten
- ,data=fulldata[which(fulldata$currentyear<2010),],correlation=corAR1(form=~1|titleID))
+ ,
+data=fulldata[which(fulldata$currentyear<2010 
+&fulldata$Ryear_x>2006),],
+correlation=corAR1(form=~1|titleID))
+
+
  
  
  #test additional Dif-in-Dif
  
-  results<-gls(diffpercentage~priordiffreviewer+logmonthage+
+  results<-gls(diffadjpop~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten
  ,data=fulldata[which(fulldata$Ryear_x<2010&fulldata$Ryear_x>2008 & fulldata$currentyear<2012),],
 correlation=corAR1(form=~1|titleID))
 
-  results<-gls(diffpercentage~priordiffreviewer+logmonthage+
-+ priormeanscore+vardiff+diffconten+diffconten*MCtreatment
+
+  results<-gls(diffadjpop~priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten+diffconten*treat
  ,data=fulldata[which(fulldata$Ryear_x<2010&fulldata$Ryear_x>2008 & fulldata$currentyear<2012),],
 correlation=corAR1(form=~1|titleID))
 
