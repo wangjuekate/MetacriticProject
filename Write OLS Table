@@ -45,12 +45,12 @@ return(final)
 }
 
 
-mm<-results
+mm<-summary(results)
 print.xtable(xtable(
-rbind(data.frame(cleardata(mm$varBeta)),
+rbind(data.frame(cleardata(mm$tTable)),
 data.frame(cbind("Obs.", nrow(fulldata))),
-data.frame(cbind("log lik.", round( 
-as.numeric(as.matrix(mm$logLik) ),digits=5) ))
+data.frame(cbind("BIC", round( 
+as.numeric(as.matrix(mm$BIC) ),digits=5) ))
 )
 )
 ,type="html",file="numfundingzipsubset1.html")
