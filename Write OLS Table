@@ -43,11 +43,14 @@ j<-j+2
 }
 return(final)
 }
+
+
+mm<-results
 print.xtable(xtable(
-rbind(data.frame(cleardata(mm$coefficients)),
+rbind(data.frame(cleardata(mm$varBeta)),
 data.frame(cbind("Obs.", nrow(fulldata))),
-data.frame(cbind("Adjusted R-squared", round( 
-as.numeric(as.matrix(mm$adj.r.squared) ),digits=5) ))
+data.frame(cbind("log lik.", round( 
+as.numeric(as.matrix(mm$logLik) ),digits=5) ))
 )
 )
 ,type="html",file="numfundingzipsubset1.html")
