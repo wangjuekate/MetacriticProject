@@ -19,7 +19,7 @@ correlation=corAR1(form=~1|titleID))
  results<-gls(Higher75diff~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten
  ,
-data=fulldata[which(fulldata$currentyear<2010),],
+data=fulldata[which(fulldata$date<as.Date("2011-06-01")),],
 correlation=corAR1(form=~1|titleID))
 
 summary(results)
@@ -28,7 +28,7 @@ summary(results)
  results<-gls(Lower25diff~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten
  ,
-data=fulldata[which(fulldata$currentyear<2010),],
+data=fulldata[which(fulldata$date<as.Date("2011-06-01")),],
 correlation=corAR1(form=~1|titleID))
 
 summary(results)
@@ -36,29 +36,35 @@ summary(results)
 
 
 #Change time span
+fulldata$date<-as.Date(paste(fulldata$currentyear,fulldata$currentmonth,"01",sep="-"))
 
   results<-gls(diffadjpop~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten
  ,
-data=fulldata[which(fulldata$currentyear<2010 
-&fulldata$Ryear_x>2001),],
-correlation=corAR1(form=~1|titleID))
-
-
-  results<-gls(diffadjpop~priordiffreviewer+logmonthage+
-+ priormeanscore+vardiff+diffconten
- ,
-data=fulldata[which(fulldata$currentyear<2010 
+data=fulldata[which(fulldata$date<as.Date("2011-06-01")
 &fulldata$Ryear_x>2008),],
 correlation=corAR1(form=~1|titleID))
 
 
+
   results<-gls(diffadjpop~priordiffreviewer+logmonthage+
 + priormeanscore+vardiff+diffconten
  ,
-data=fulldata[which(fulldata$currentyear<2010 
-&fulldata$Ryear_x>2006),],
+data=fulldata[which(fulldata$date<as.Date("2011-06-01")
+&fulldata$Ryear_x>2005),],
 correlation=corAR1(form=~1|titleID))
+
+summary(results)
+
+
+  results<-gls(diffadjpop~priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten
+ ,
+data=fulldata[which(fulldata$date<as.Date("2011-06-01")
+&fulldata$Ryear_x>2002),],
+correlation=corAR1(form=~1|titleID))
+
+summary(results)
 
 
  
@@ -125,9 +131,9 @@ p<-p+theme_bw()
 #Figure absolute number
 library(ggplot2)
 library(plyr)
-todrawdata<-fulldata[,1:2]
-todrawdata$RTuser<-fulldata$RTuser
-todrawdata$MCuser<-fulldata$MCuser
+todrawdata<-fulldata[which(fulldata$currentyear<2010 ),3:4]
+todrawdata$RTuser<-fulldata[which(fulldata$currentyear<2010 ),]$RTuser
+todrawdata$MCuser<-fulldata[which(fulldata$currentyear<2010 ),]$MCuser
 addup<-function(input){
 RTuser<-mean(input[,3])
 MCuser<-mean(input[,4])
