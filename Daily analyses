@@ -1,0 +1,337 @@
+#first confirm number of users over time on two websites
+MTuser<-read.dta(
+"D:\\All_Projects\\Project_Ming\\VariableList\\MetacriticMovieDay\\MCuserreview.dta")
+RTuser<-read.dta(
+"D:\\All_Projects\\Project_Ming\\VariableList\\RottenTomatoMovieDay\\RTrecord01.dta")
+
+MTuser
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  -19.0    28.0   145.0   477.3   523.0  4830.0 
+
+summary(RTuser$movieage)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    -19     435    1164    1418    2162    5818 
+
+#follow for 5 months
+library(foreign)
+movieoverlap<-read.dta(
+"D:\\All_Projects\\Project_Ming\\VariableList\\MovieRelease\\Overlapmovies.dta")
+
+movie<-movieoverlap[,5:7]
+movie$titleID<-movieoverlap$title_ID
+enlong<-function(input){
+input<-as.character(as.matrix(input))
+mm<-data.frame(seq(0,150))
+output<-cbind(mm,data.frame(t(input)))
+return(output)
+}
+results<-apply(movie,1,enlong)
+results<-do.call(rbind,results)
+results<-data.frame(results)
+colnames(results)<-c("monthage","Ryear","Rmonth","Rday","titleID")
+write.table(results,
+ file="moviesdailybaseline_0902.csv",sep=",",row.names=FALSE,na="")
+
+
+################################MC calculate to daily level##################################
+#MTuser$movieage
+addup<-function(input){
+output<-colSums(input[,5:15])
+return(output)
+}
+library(plyr)
+results<-ddply(MTuser,.(title_id,movieage),addup)
+nrow(baseline)
+baseline1<-merge(baseline,results,by.x=c("titleID","monthage"),
+ by.y=c("title_id","movieage"),all.x=TRUE)
+nrow(baseline1)
+summary(baseline1)
+
+
+library(e1071)
+#calculate DV, IV
+baseline1$MCuser<-rowSums(baseline1[,6:16])
+data <- as.data.frame(baseline1)
+data[is.na(data)] <- 0
+
+calcumu<-function(input){
+mm<-matrix(0,nrow=nrow(input),ncol=nrow(input))
+mm<-lower.tri(mm)
+record<-input[,6:16]
+record1<-mm%*%as.matrix(record)
+MCkurto_p<-matrix(0,nrow=nrow(input),ncol=1)
+MCvar_p<-matrix(0,nrow=nrow(input),ncol=1)
+MCmean_p<-matrix(0,nrow=nrow(input),ncol=1)
+MCnreview_p<-matrix(0,nrow=nrow(input),ncol=1)
+for(i in 1:nrow(record1)){
+tocal<-rep(c(0,1,2,3,4,5,6,7,8,9,10),record1[i,])
+MCkurto_p[i]<-kurtosis(tocal)
+MCvar_p[i]<-sd(tocal,na.rm=TRUE)
+MCmean_p[i]<-mean(tocal,na.rm=TRUE)
+MCnreview_p[i]<-sum(record1)
+}
+MCkurto_p<-paste(MCkurto_p,collapse=",")
+MCvar_p<-paste(MCvar_p,collapse=",")
+MCmean_p<-paste(MCmean_p,collapse=",")
+MCnreview_p<-paste(MCnreview_p,collapse=",")
+output<-data.frame(MCkurto_p)
+output<-cbind(output,MCvar_p, MCmean_p,MCnreview_p)
+return(output)
+}
+library(plyr)
+data<-data[order(data$titleID,data$monthage),]
+results<-ddply(data,.(titleID),calcumu)
+
+
+data$MCkurto_p<-as.numeric(as.matrix(
+unlist(strsplit(as.matrix(results[,2]),","))))
+data$MCvar_p<-as.numeric(as.matrix(
+unlist(strsplit(as.matrix(results[,3]),","))))
+data$MCmean_p<-as.numeric(as.matrix(
+unlist(strsplit(as.matrix(results[,4]),","))))
+data$MCnreview_p<-as.numeric(as.matrix(
+unlist(strsplit(as.matrix(results[,5]),","))))
+
+
+
+write.dta(data,file="MCmerged.dta")
+
+
+
+#####################################RT calculate to daily level###############################
+
+
+baseline<-read.table("moviesdailybaseline_0902.csv",sep=",",header=TRUE)
+
+data<-RTuser
+addup<-function(input){
+output<-colSums(input[,2:12])
+return(output)
+}
+library(plyr)
+results<-ddply(data,.(title_ID,movieage),addup)
+nrow(baseline)
+
+write.dta(results, file="RTsumtodaily.dta") # saved results
+
+
+baseline1<-merge(baseline,results,by.x=c("titleID","monthage"), 
+by.y=c("title_ID","movieage"),all.x=TRUE)
+nrow(baseline1)
+summary(baseline1)
+library(e1071)
+
+baseline1$RTuser<-rowSums(baseline1[,6:16],na.rm=TRUE)
+data <- as.data.frame(baseline1)
+data[is.na(data)] <- 0
+
+
+#calculate DV, IV
+
+calcumu<-function(input){
+mm<-matrix(0,nrow=nrow(input),ncol=nrow(input))
+mm<-lower.tri(mm)
+record<-as.matrix(input[,6:16])
+record[which(is.na(record))]<-0
+record1<-mm%*%record
+RTkurto_p<-matrix(0,nrow=nrow(input),ncol=1)
+RTvar_p<-matrix(0,nrow=nrow(input),ncol=1)
+RTmean_p<-matrix(0,nrow=nrow(input),ncol=1)
+RTnreview_p<-matrix(0,nrow=nrow(input),ncol=1)
+for(i in 1:nrow(record1)){
+tocal<-rep(c(0,1,2,3,4,5,6,7,8,9,10),record1[i,])
+RTkurto_p[i]<-kurtosis(tocal,na.rm=TRUE)
+RTvar_p[i]<-var(tocal,na.rm=TRUE)
+RTmean_p[i]<-mean(tocal,na.rm=TRUE)
+RTnreview_p[i]<-sum(record1[i,])
+}
+RTkurto_p<-paste(RTkurto_p,collapse=",")
+RTvar_p<-paste(RTvar_p,collapse=",")
+RTmean_p<-paste(RTmean_p,collapse=",")
+RTnreview_p<-paste(RTnreview_p,collapse=",")
+output<-data.frame(RTkurto_p)
+output<-cbind(output,RTvar_p,RTmean_p,RTnreview_p)
+return(output)
+}
+library(plyr)
+data<-baseline1[order(data$titleID,data$monthage),]
+results<-ddply(data,.(titleID),calcumu)
+MCkurto_p<-as.numeric(as.matrix(unlist(strsplit(as.character(
+as.matrix(results[2])),","))))
+MCvar_p<-as.numeric(as.matrix(unlist(strsplit(
+as.character(
+as.matrix(results[3])),","))))
+MCmean_p<-as.numeric(as.matrix(unlist(strsplit(
+as.character(
+as.matrix(results[4])),","))))
+MCnreview_p<-as.numeric(as.matrix(unlist(strsplit(
+as.character(
+as.matrix(results[5])),","))))
+data$RTkurto_p<-MCkurto_p
+data$RTvar_p<-MCvar_p
+data$RTmean_p<-MCmean_p
+data$RTnreview_p<-MCnreview_p
+
+
+treatage<-as.Date("2010-08-11")-as.Date(paste(baseline1$Ryear,
+baseline1$Rmonth,baseline1$Rday,sep="-"))
+treatage<-floor(as.numeric(as.matrix(treatage))/30)
+baseline1$treatage<-treatage
+
+write.dta(baseline1,file="RTdataset.dta")
+
+
+
+
+#merge there datasets
+library(foreign)
+MC<-read.dta("MCmerged.dta")
+RT<-read.dta("RTdataset.dta")
+Full<-merge(MC,RT,by.x=c("titleID","monthage"),
+by.y=c("titleID","monthage"),all.x=TRUE)
+
+
+#adjust variables that need to be adjusted, DV, IV
+fulldata<-Full
+
+fulldata$MCkurtoadj<-fulldata$MCkurto_p
+fulldata[which(is.na(fulldata$MCkurtoadj)),]$MCkurtoadj<-0
+fulldata$RTkurtoadj<-fulldata$RTkurto_p
+fulldata[which(is.na(fulldata$RTkurtoadj)),]$RTkurtoadj<-0
+fulldata$diffconten<-fulldata$MCkurtoadj-fulldata$RTkurtoadj
+
+
+fulldata$currentdate<-as.Date(paste(fulldata$Ryear.x,
+fulldata$Rmonth.x,fulldata$Rday.x,sep="-"))+
+fulldata$monthage
+fulldata$currentyear<-format(fulldata$currentdate,'%Y')
+fulldata$currentmonth<-format(fulldata$currentdate,'%m')
+fulldata$currentday<-format(fulldata$currentdate,'%d')
+
+adduptoeachmonthdata<-fulldata[,45:47]
+adduptoeachmonthdata$MCuser<-fulldata$MCuser
+adduptoeachmonthdata$RTuser<-fulldata$RTuser
+
+
+#all reviewers now
+adduptoeachmonth<-function(input){
+MCreviewpop<-sum(input[,4])
+RTreviewpop<-sum(input[,5])
+output<-data.frame(MCreviewpop)
+output<-cbind(output,RTreviewpop)
+}
+library(plyr)
+toadd<-ddply(adduptoeachmonthdata,
+.(currentyear,currentmonth,currentday),adduptoeachmonth)
+nrow(fulldata)
+fulldata<-merge(fulldata,toadd,
+by.x=c("currentyear","currentmonth","currentday"),
+by.y=c("currentyear","currentmonth","currentday"),all.x=TRUE)
+
+#all reviewers yesterday
+toadd<-fulldata[,1:4]
+toadd$MCreviewpop<-fulldata$MCreviewpop
+toadd$RTreviewpop<-fulldata$RTreviewpop
+toadd<-toadd[order(toadd$titleID,toadd$currentyear,toadd$currentmonth,
+toadd$currentday),]
+fulldata<-fulldata[order(fulldata$titleID,
+fulldata$currentyear,fulldata$currentmonth,
+fulldata$currentday),]
+lastperiod<-function(input){
+MCprior<-c(0,input[,5])
+MCprior<-MCprior[1:length(input[,5])]
+MCprior<-paste(MCprior,collapse=",")
+RTprior<-c(0,input[,6])
+RTprior<-RTprior[1:length(input[,6])]
+RTprior<-paste(RTprior,collapse=",")
+output<-data.frame(MCprior,RTprior)
+return(output)
+}
+results<-ddply(toadd,.(titleID),lastperiod)
+fulldata$MCreview_p1<-
+as.numeric(as.matrix(unlist(strsplit(as.matrix(results[,2]),","))))
+
+fulldata[which(fulldata$MCreview_p1==0),]$MCreview_p1<-fulldata[which(fulldata$MCreview_p1==0),]$MCreviewpop
+fulldata$RTreview_p1<-
+as.numeric(as.matrix(unlist(strsplit(as.matrix(results[,3]),","))))
+fulldata[which(fulldata$RTreview_p1==0),]$RTreview_p1<-fulldata[which(fulldata$RTreview_p1==0),]$RTreviewpop
+
+
+fulldata$MCadjpop<-fulldata$MCuser*100/(fulldata$MCreview_p1+1)
+fulldata$RTadjpop<-fulldata$RTuser*100/(fulldata$RTreview_p1+1)
+
+fulldata$diffadjpop<-fulldata$MCadjpop-fulldata$RTadjpop
+
+#draw and showing that DV is reliabe
+library(ggplot2)
+library(plyr)
+todrawdata<-fulldata[,4:5]
+todrawdata$RTuser<-fulldata$RTadjpop
+todrawdata$MCuser<-fulldata$MCadjpop
+addup<-function(input){
+RTuser<-mean(input[,3])
+MCuser<-mean(input[,4])
+output<-data.frame(RTuser)
+output<-cbind(output,MCuser)
+return(output)
+}
+
+todraw<-ddply(todrawdata,.(monthage),addup)
+
+cols <- c("RT"="longdash","MC"="solid")
+p<-ggplot(todraw,aes(monthage))
+p<-p+scale_linetype_manual(name="Websites",values=cols) 
+p<-p+
+geom_line(aes(y=MCuser,linetype="MC"))+
+geom_line(aes(y=RTuser,linetype="RT"))
+p<-p+labs(x="Days Since the First Review",y="Mean Number of Reviews"
+)
+p<-p+ theme(legend.key = element_rect(fill = "white",colour = "white"))
+p<-p+ theme_bw() +
+  theme(axis.title.x = element_text(size = 15, vjust=-.2)) +
+  theme(axis.title.y = element_text(size = 15, vjust=0.3))
+
+
+
+#control variables adjusted
+fulldata$treatment<-0
+fulldata[which(fulldata$currentdate>as.Date("2010-08-11")),]$treatment<-1
+fulldata$priordiffreviewer<-fulldata$MCnreview_p-fulldata$RTnreview_p
+summary(fulldata$priordiffreviewer)
+fulldata$logmonthage<-log(fulldata$monthage+1)
+
+#adjust for missing value
+fulldata$adjMCmean_p<-fulldata$MCmean_p
+fulldata[which(is.na(fulldata$adjMCmean_p)),]$adjMCmean_p<-5
+
+fulldata$adjRTmean_p<-fulldata$RTmean_p
+fulldata[which(is.na(fulldata$adjRTmean_p)),]$adjRTmean_p<-5
+
+
+fulldata$priormeanscore<-fulldata$adjMCmean_p-fulldata$adjRTmean_p
+summary(fulldata$priormeanscore)
+
+fulldata$adjMCvar_p<-fulldata$MCvar_p
+fulldata[which(is.na(fulldata$adjMCvar_p)),]$adjMCvar_p<-0
+
+fulldata$adjRTvar_p<-fulldata$RTvar_p
+fulldata[which(is.na(fulldata$adjRTvar_p)),]$adjRTvar_p<-0
+
+
+fulldata$vardiff<-fulldata$adjMCvar_p-fulldata$adjRTvar_p
+summary(fulldata$vardiff)
+
+#summary table
+
+
+#results 
+#No choice of movies, just use all sample
+ results<-gls(diffadjpop~priordiffreviewer+logmonthage+
++ priormeanscore+vardiff+diffconten,
+data=fulldata[which(fulldata$currentdate<as.Date("2010-08-11")),],
+correlation=corAR1(form=~1|titleID))
+
+summary(results)
+
+
+
