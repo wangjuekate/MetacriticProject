@@ -48,7 +48,7 @@ return(final)
 mm<-summary(results)
 print.xtable(xtable(
 rbind(data.frame(cleardata(mm$tTable)),
-data.frame(cbind("Obs.", nrow(fulldata))),
+data.frame(cbind("Obs.", mm$dims$N)),
 data.frame(cbind("BIC", round( 
 as.numeric(as.matrix(mm$BIC) ),digits=5) ))
 )
